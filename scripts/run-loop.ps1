@@ -14,6 +14,9 @@ param (
     [string]$Action = "status"
 )
 
+# Enable UTF8 output to ensure emojis render correctly in PowerShell
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
 $WorkspaceRoot = Resolve-Path "$PSScriptRoot\.."
 $ProgressFile = "$WorkspaceRoot\progress.md"
 
