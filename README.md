@@ -14,6 +14,19 @@ Rocket League matches generate a rich stream of telemetry data—positioning coo
 3. ⏱️ **Interactive Event Timeline**: A playback scrubber allowing users to jump directly to key events—goals, assists, saves, and demolitions.
 4. 📈 **Stat Overlays**: Tabular comparison of team and individual stats parsed from the replay header properties.
 
+
+---
+
+## ⚙️ Data Generation & Parsing
+
+Replay files (`.replay`) are parsed into the JSON format expected by this application using [RocketLeagueReplayParser](https://github.com/jjbott/RocketLeagueReplayParser) by jjbott.
+
+To convert a `.replay` file to the JSON format used in `res/`, you can compile or download the parser tool from its repository and execute it:
+```bash
+# Example command to parse a replay file to JSON
+RocketLeagueReplayParser.exe "my_match.replay" > "my_match.json"
+```
+
 ---
 
 ## 🏗️ Technical Architecture & Directory Structure
