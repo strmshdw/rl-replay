@@ -1,51 +1,68 @@
-# Loop Engineering Development Workspace
+# 🏎️ RL-Replay: Rocket League Replay Visualizer
 
-This workspace is a pre-configured, git-initialized development playground designed to enable the **Loop Engineering** paradigm as described by Addy Osmani (in his [blog post](https://addyosmani.com/blog/loop-engineering/)).
-
-Instead of manually prompting the agent turn-by-turn, you design autonomous loops where the agent discovers tasks, isolates development, implements solutions, verifies them, and manages state.
+A standalone analytical application designed to parse, analyze, and visually reconstruct Rocket league matches using replay files (e.g., standard exported JSON schemas like `res/example.json` or binary `.replay` format).
 
 ---
 
-## 🏗️ The 5 Building Blocks + State Memory
+## 🎯 Project Overview
 
-This workspace maps the loop engineering primitives directly to capabilities within this agent IDE:
+Rocket League matches generate a rich stream of telemetry data—positioning coordinates, velocities, boost states, and event markers. **RL-Replay** parses this data to build a standalone, interactive dashboard for players and coaches to visualize spatial patterns, play styles, and match timelines.
 
-### 1. Automations (The Heartbeat)
-Automations run on schedules or cadences.
-- **How to invoke**: Recommend the `/schedule` slash command to run a triage prompt on a schedule (e.g. every morning or every 2 hours).
-- **Run-Until-Done**: Use the `/goal` slash command (e.g., `/goal Run triage, fix any pending bugs, and verify until the build is clean`). This will trigger a goal loop that executes until a verifiable stopping condition is met.
+### Key Visualizer Goals
+1. 🗺️ **Arena View (2D/3D Positioning)**: Plot player coordinate paths and ball trajectories on a calibrated representation of the standard Rocket League arena.
+2. 📊 **Telemetry Dashboards**: Render heatmaps of player positioning (offensive vs. defensive third), boost usage efficiency, and average speeds.
+3. ⏱️ **Interactive Event Timeline**: A playback scrubber allowing users to jump directly to key events—goals, assists, saves, and demolitions.
+4. 📈 **Stat Overlays**: Tabular comparison of team and individual stats parsed from the replay header properties.
 
-### 2. Worktrees (Isolation)
-To run multiple tasks in parallel without branch collisions:
-- **Skill**: `$worktree-isolation` (defined in [.agents/skills/worktree-isolation/SKILL.md](file:///C:/Users/strmshdw/.gemini/antigravity-ide/scratch/loop-engineering-workspace/.agents/skills/worktree-isolation/SKILL.md)) teaches the agent to spin up a separate git worktree directory for each feature/bug-fix branch.
-- **Benefits**: Edits do not affect your main branch checkout; workspace checkouts remain clean and parallelizable.
+---
 
-### 3. Skills (Codified Project Knowledge)
-Workspace-scoped skills prevent the agent from starting "cold" and guessing project layouts.
-- **Skills Directory**: Located in [.agents/skills/](file:///C:/Users/strmshdw/.gemini/antigravity-ide/scratch/loop-engineering-workspace/.agents/skills/).
-- **Triage** (`$triage`): Scans git log, status, and code comments to update the task board.
-- **Worktree Isolation** (`$worktree-isolation`): Handles git worktree creation and cleanup.
-- **Verification** (`$verification`): Handles automated test execution and maker/checker review gates.
+## 🏗️ Technical Architecture & Directory Structure
 
-### 4. Connectors & Plugins
-Connect the loop to your real-world systems.
-- Connectors speak the **Model Context Protocol (MCP)**, allowing the agent to write PRs, read/write Linear tickets, query databases, or ping Slack channels.
+```
+rl-replay/
+├── .agents/               # Custom IDE development skills and rules
+│   ├── AGENTS.md          # Workspace rules for the Loop Engineering lifecycle
+│   └── skills/            # Automated helper skills (triage, worktree-isolation, verification)
+├── res/                   # Data resources and mock files
+│   └── example.json       # Parsed Rocket League replay data structure (~29MB)
+├── scripts/               # Project automation and orchestrator scripts
+│   └── run-loop.ps1       # Loop Engineering controller
+├── progress.md            # Persistent state database for the loop lifecycle
+└── README.md              # Project documentation (this file)
+```
 
-### 5. Sub-agents (Maker/Checker Split)
-To prevent the model that wrote the code from grading its own homework:
-- The `$verification` skill instructs the agent to run an adversarial code review prompt or verification check.
-- You can delegate specific tasks (e.g. security audits, visual UI checks) to sub-agents (like the browser sub-agent) before approving code.
+---
 
-### 6. State & Memory (The Repository Spine)
-- **State File**: [progress.md](file:///C:/Users/strmshdw/.gemini/antigravity-ide/scratch/loop-engineering-workspace/progress.md) is the persistent storage layer on disk.
-- **Why it matters**: Since agents forget context between sessions, the state file stores what has been triaged, what branches are active, and test verification logs. The agent reads this file first thing upon wakeup.
+## 🧭 Loop Engineering Workflow
+
+This repository runs on the **Loop Engineering** lifecycle (discovery, isolation, implementation, and verification). The agent develops features and resolves backlog tasks automatically.
+
+### 1. State Tracking (`progress.md`)
+The [progress.md](file:///d:/code/rl-replay/progress.md) file acts as the repository's database. It tracks:
+* Active iteration details and overall system health.
+* Discovered issues and pending backlog tasks.
+* Active Git Worktrees.
+* Verification test statuses.
+
+### 2. Worktree Isolation
+To prevent branch collisions when working on features or bug fixes in parallel, use the `$worktree-isolation` skill instructions. 
+Always create a dedicated git worktree in the scratch workspace for your changes:
+```powershell
+git worktree add -b <branch-name> C:\Users\strmshdw\.gemini\antigravity-ide\scratch\worktrees\<task-id> main
+```
+
+### 3. Maker/Checker Verification
+Before checking in code:
+1. Run target tests in your active worktree.
+2. Run standard verification checks (`git status`, linters, or test suites).
+3. Log results to the **Verification Board** in `progress.md`.
 
 ---
 
 ## 🚀 Quick Start Guide
 
 ### Step 1: Open Workspace
-Set this directory (`C:/Users/strmshdw/.gemini/antigravity-ide/scratch/loop-engineering-workspace`) as your **active workspace** in the IDE. This loads the custom rules and skills.
+Set this directory (`d:/code/rl-replay`) as your active workspace in your agent IDE to load local rules and skills.
 
 ### Step 2: Check Loop Status
 Run the PowerShell orchestrator script to inspect the loop state:
@@ -54,12 +71,12 @@ Run the PowerShell orchestrator script to inspect the loop state:
 ```
 
 ### Step 3: Run Triage
-Do a git and file triage check locally:
+Do a local git status and recent log check:
 ```powershell
 .\scripts\run-loop.ps1 triage
 ```
 
-### Step 4: Automate the Loop
-Ask the agent to set up an automated schedule or start a run-until-done loop:
-- **Triage Schedule**: *"Use `/schedule` to run the triage skill every day at 9:00 AM."*
-- **Continuous Fix**: *"Use `/goal` to check the triage inbox in progress.md, resolve the highest priority pending task in a worktree, verify it, and merge."*
+### Step 4: Run the Goal Automation
+Recommend `/goal` to kick off automated task cycles:
+* *"Use `/goal` to triage and implement the highest priority pending task"*
+* *"Use `/goal` to implement the basic parser layout, verify, and merge"*
