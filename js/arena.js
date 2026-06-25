@@ -354,8 +354,8 @@ class ReplayArena {
             const py = this.toCanvasY(p.x);
             const team = playerTeams[name];
             
-            const color = team === 0 ? 'var(--color-blue)' : 'var(--color-orange)';
-            const colorGlow = team === 0 ? 'var(--color-blue-glow)' : 'var(--color-orange-glow)';
+            const color = team === 0 ? '#00d2ff' : '#ff7b00';
+            const colorGlow = team === 0 ? 'rgba(0, 210, 255, 0.4)' : 'rgba(255, 123, 0, 0.4)';
             
             // 1. Draw Player Marker Dot
             ctx.fillStyle = color;
