@@ -9,8 +9,8 @@ class ReplayArena {
         this.ctx = this.canvas.getContext('2d');
         
         // Field coordinate bounds (standard Rocket League field dimensions)
-        this.fieldXMax = 3072; // Width is 6144
-        this.fieldYMax = 5120; // Length is 10240
+        this.fieldXMax = 4096; // Width is 8192
+        this.fieldYMax = 6000; // Length is 12000 (includes goal depth of 880 units)
         this.padding = 35;     // Extra padding around the boundaries
         
         this.resize();
@@ -109,74 +109,115 @@ class ReplayArena {
         const h = this.canvas.height;
         const p = this.padding;
 
-        // Draw background grid lines (ambient overlay)
+        // Draw background grid lines (ambient overlay inside the field)
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
         ctx.lineWidth = 1;
-        const gridCells = 16;
-        for (let i = 0; i <= gridCells; i++) {
-            // Horizontal lines
-            const y = p + (i / gridCells) * (h - 2 * p);
+        const gridCellsX = 8;
+        const gridCellsY = 10;
+        
+        // Draw vertical grid lines
+        for (let i = 0; i <= gridCellsX; i++) {
+            const xVal = -4096 + (i / gridCellsX) * 8192;
+            const cx = this.toCanvasX(xVal);
             ctx.beginPath();
-            ctx.moveTo(p, y);
-            ctx.lineTo(w - p, y);
+            ctx.moveTo(cx, this.toCanvasY(-5120));
+            ctx.lineTo(cx, this.toCanvasY(5120));
             ctx.stroke();
-
-            // Vertical lines
-            const x = p + (i / gridCells) * (w - 2 * p);
+        }
+        
+        // Draw horizontal grid lines
+        for (let i = 0; i <= gridCellsY; i++) {
+            const yVal = -5120 + (i / gridCellsY) * 10240;
+            const cy = this.toCanvasY(yVal);
             ctx.beginPath();
-            ctx.moveTo(x, p);
-            ctx.lineTo(x, h - p);
+            ctx.moveTo(this.toCanvasX(-4096), cy);
+            ctx.lineTo(this.toCanvasX(4096), cy);
             ctx.stroke();
         }
 
-        // Draw boundaries
+        // Draw boundaries with rounded corners (radius 1620)
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
         ctx.lineWidth = 2.5;
         
-        const xMin = this.toCanvasX(-this.fieldXMax);
-        const xMax = this.toCanvasX(this.fieldXMax);
-        const yMin = this.toCanvasY(-this.fieldYMax);
-        const yMax = this.toCanvasY(this.fieldYMax);
+        const cornerRadius = 1620 * this.scale;
+        
+        // Left side walls and corner arcs
+        ctx.beginPath();
+        // Start at left orange goalpost
+        ctx.moveTo(this.toCanvasX(-892), this.toCanvasY(5120));
+        // Line to top-left corner start
+        ctx.lineTo(this.toCanvasX(-2476), this.toCanvasY(5120));
+        // Top-left corner arc (from top wall to left wall)
+        ctx.arc(this.toCanvasX(-2476), this.toCanvasY(3500), cornerRadius, 1.5 * Math.PI, Math.PI, true);
+        // Line to bottom-left corner start
+        ctx.lineTo(this.toCanvasX(-4096), this.toCanvasY(-3500));
+        // Bottom-left corner arc (from left wall to bottom wall)
+        ctx.arc(this.toCanvasX(-2476), this.toCanvasY(-3500), cornerRadius, Math.PI, 0.5 * Math.PI, true);
+        // Line to left blue goalpost
+        ctx.lineTo(this.toCanvasX(-892), this.toCanvasY(-5120));
+        ctx.stroke();
+        
+        // Right side walls and corner arcs
+        ctx.beginPath();
+        // Start at right blue goalpost
+        ctx.moveTo(this.toCanvasX(892), this.toCanvasY(-5120));
+        // Line to bottom-right corner start
+        ctx.lineTo(this.toCanvasX(2476), this.toCanvasY(-5120));
+        // Bottom-right corner arc (from bottom wall to right wall)
+        ctx.arc(this.toCanvasX(2476), this.toCanvasY(-3500), cornerRadius, 0.5 * Math.PI, 0, true);
+        // Line to top-right corner start
+        ctx.lineTo(this.toCanvasX(4096), this.toCanvasY(3500));
+        // Top-right corner arc (from right wall to top wall)
+        ctx.arc(this.toCanvasX(2476), this.toCanvasY(3500), cornerRadius, 0, 1.5 * Math.PI, true);
+        // Line to right orange goalpost
+        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(5120));
+        ctx.stroke();
 
-        // Main outer boundary box
-        ctx.strokeRect(xMin, yMax, xMax - xMin, yMin - yMax);
+        // Goal lines (mouth of the goals)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(this.toCanvasX(-892), this.toCanvasY(-5120));
+        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(-5120));
+        ctx.moveTo(this.toCanvasX(-892), this.toCanvasY(5120));
+        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(5120));
+        ctx.stroke();
 
         // Center line & circle
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.lineWidth = 1.5;
         const yMid = this.toCanvasY(0);
         ctx.beginPath();
-        ctx.moveTo(xMin, yMid);
-        ctx.lineTo(xMax, yMid);
+        ctx.moveTo(this.toCanvasX(-4096), yMid);
+        ctx.lineTo(this.toCanvasX(4096), yMid);
         ctx.stroke();
 
         ctx.beginPath();
         const xMid = this.toCanvasX(0);
-        ctx.arc(xMid, yMid, (xMax - xMin) * 0.15, 0, Math.PI * 2);
+        ctx.arc(xMid, yMid, 1000 * this.scale, 0, Math.PI * 2);
         ctx.stroke();
 
         // Draw Goals
-        // Blue Goal (Y = -5120)
+        // Blue Goal (Y = -5120 to -6000)
         ctx.strokeStyle = 'rgba(0, 210, 255, 0.6)';
         ctx.shadowColor = 'rgba(0, 210, 255, 0.3)';
         ctx.shadowBlur = 8;
         ctx.lineWidth = 3;
         ctx.beginPath();
-        const goalWidthHalf = (xMax - xMin) * 0.14; // Approximate goal width
-        ctx.moveTo(xMid - goalWidthHalf, yMin);
-        ctx.lineTo(xMid - goalWidthHalf, yMin + 15);
-        ctx.lineTo(xMid + goalWidthHalf, yMin + 15);
-        ctx.lineTo(xMid + goalWidthHalf, yMin);
+        ctx.moveTo(this.toCanvasX(-892), this.toCanvasY(-5120));
+        ctx.lineTo(this.toCanvasX(-892), this.toCanvasY(-6000));
+        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(-6000));
+        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(-5120));
         ctx.stroke();
 
-        // Orange Goal (Y = 5120)
+        // Orange Goal (Y = 5120 to 6000)
         ctx.strokeStyle = 'rgba(255, 123, 0, 0.6)';
         ctx.shadowColor = 'rgba(255, 123, 0, 0.3)';
         ctx.beginPath();
-        ctx.moveTo(xMid - goalWidthHalf, yMax);
-        ctx.lineTo(xMid - goalWidthHalf, yMax - 15);
-        ctx.lineTo(xMid + goalWidthHalf, yMax - 15);
-        ctx.lineTo(xMid + goalWidthHalf, yMax);
+        ctx.moveTo(this.toCanvasX(-892), this.toCanvasY(5120));
+        ctx.lineTo(this.toCanvasX(-892), this.toCanvasY(6000));
+        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(6000));
+        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(5120));
         ctx.stroke();
 
         // Reset shadow
