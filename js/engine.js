@@ -398,7 +398,7 @@ class ReplayEngine {
             }
 
             // Update speed telemetry in sidebar list (approximate speed in km/h)
-            const speedKmh = this.calculateSpeedKmh(pK, pK1, fK.time, fK1.time);
+            const speedKmh = Math.round(pK.speed + alpha * ((pK1.speed !== undefined ? pK1.speed : pK.speed) - pK.speed));
             const rowName = name.replace(/\s+/g, '_');
             const speedEl = document.getElementById(`speed-${rowName}`);
             const boostEl = document.getElementById(`boost-${rowName}`);

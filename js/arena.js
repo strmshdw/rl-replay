@@ -63,31 +63,39 @@ class ReplayArena {
         const rect = this.canvas.parentElement.getBoundingClientRect();
         this.canvas.width = rect.width;
         this.canvas.height = rect.height;
+        this.updateScale();
+    }
+
+    updateScale() {
+        const availWidth = this.canvas.width - 2 * this.padding;
+        const availHeight = this.canvas.height - 2 * this.padding;
+        
+        const scaleX = availWidth / (2 * this.fieldXMax);
+        const scaleY = availHeight / (2 * this.fieldYMax);
+        
+        // Preserve aspect ratio by using the smaller scale factor
+        this.scale = Math.min(scaleX, scaleY);
+        
+        // Center the field on canvas
+        this.offsetX = this.padding + (availWidth - (2 * this.fieldXMax) * this.scale) / 2;
+        this.offsetY = this.padding + (availHeight - (2 * this.fieldYMax) * this.scale) / 2;
     }
 
     // Convert game coordinate X to Canvas coordinate X
     toCanvasX(x) {
-        // Map X: [-fieldXMax, fieldXMax] -> [padding, width - padding]
-        const range = this.canvas.width - 2 * this.padding;
-        const normalized = (x + this.fieldXMax) / (2 * this.fieldXMax);
-        return this.padding + normalized * range;
+        return this.offsetX + (x + this.fieldXMax) * this.scale;
     }
 
     // Convert game coordinate Y to Canvas coordinate Y (Rocket League Y goes up to orange goal, down to blue)
     toCanvasY(y) {
-        // Map Y: [-fieldYMax, fieldYMax] -> [height - padding, padding] (flip Y-axis for standard top-down view)
-        const range = this.canvas.height - 2 * this.padding;
-        const normalized = (y + this.fieldYMax) / (2 * this.fieldYMax);
-        return this.canvas.height - this.padding - normalized * range;
+        // Flip Y-axis for top-down view
+        return this.canvas.height - (this.offsetY + (y + this.fieldYMax) * this.scale);
     }
 
     // Convert Canvas coordinate to Game coordinates (useful for clicks or mapping back)
     toGameCoords(cx, cy) {
-        const rangeX = this.canvas.width - 2 * this.padding;
-        const rangeY = this.canvas.height - 2 * this.padding;
-        
-        const gx = ((cx - this.padding) / rangeX) * (2 * this.fieldXMax) - this.fieldXMax;
-        const gy = ((this.canvas.height - this.padding - cy) / rangeY) * (2 * this.fieldYMax) - this.fieldYMax;
+        const gx = ((cx - this.offsetX) / this.scale) - this.fieldXMax;
+        const gy = ((this.canvas.height - cy - this.offsetY) / this.scale) - this.fieldYMax;
         return { x: gx, y: gy };
     }
 

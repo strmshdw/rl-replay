@@ -28,6 +28,8 @@ class ReplayParser {
 
                 const currentPositions = {}; // PlayerName -> { x, y, z, yaw }
                 const currentBoost = {};     // PlayerName -> number (0 to 100)
+                const currentSpeed = {};     // PlayerName -> number (speed in km/h)
+                const lastUpdatePos = {};    // PlayerName -> { x, y, z, time }
                 let currentBall = { x: 0, y: 0, z: 0 };
                 let ballActorId = null;
 
@@ -99,6 +101,44 @@ class ReplayParser {
                                                 z: pos.Z,
                                                 yaw: yaw
                                             };
+
+                                            // Calculate speed
+                                            let speedKmh = 0;
+                                            let speedCalculated = false;
+
+                                            // 1. Try linear velocity vector from physics
+                                            if (rbState.LinearVelocity) {
+                                                const lv = rbState.LinearVelocity;
+                                                const mag = Math.sqrt(lv.X*lv.X + lv.Y*lv.Y + lv.Z*lv.Z);
+                                                speedKmh = Math.min(141, Math.round(mag * 0.036));
+                                                speedCalculated = true;
+                                            }
+
+                                            // 2. Fall back to differential calculations between update steps
+                                            if (!speedCalculated && lastUpdatePos[name]) {
+                                                const prev = lastUpdatePos[name];
+                                                const dt = time - prev.time;
+                                                if (dt > 0) {
+                                                    const dist = Math.sqrt(
+                                                        Math.pow(pos.X - prev.x, 2) +
+                                                        Math.pow(pos.Y - prev.y, 2) +
+                                                        Math.pow(pos.Z - prev.z, 2)
+                                                    );
+                                                    speedKmh = Math.min(141, Math.round((dist / dt) * 0.036));
+                                                    speedCalculated = true;
+                                                }
+                                            }
+
+                                            if (speedCalculated) {
+                                                currentSpeed[name] = speedKmh;
+                                            }
+
+                                            lastUpdatePos[name] = {
+                                                x: pos.X,
+                                                y: pos.Y,
+                                                z: pos.Z,
+                                                time: time
+                                            };
                                         }
                                     }
                                 }
@@ -139,7 +179,8 @@ class ReplayParser {
                         Object.keys(currentPositions).forEach(name => {
                             frameSnapshot.players[name] = {
                                 ...currentPositions[name],
-                                boost: currentBoost[name] !== undefined ? currentBoost[name] : 33
+                                boost: currentBoost[name] !== undefined ? currentBoost[name] : 33,
+                                speed: currentSpeed[name] !== undefined ? currentSpeed[name] : 0
                             };
                         });
 
