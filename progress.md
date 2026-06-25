@@ -18,7 +18,7 @@ These items are discovered by the automated triage schedule. They must be valida
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `TASK-001` | Initial setup validation | 2026-06-24 | High | `[x] Completed` | None |
 | `TASK-002` | Field aspect ratio scaling and boundary overshoot | 2026-06-25 | High | `[x] Completed` | None |
-| `TASK-003` | Constant speed telemetry dropout (drops to 0 km/h) | 2026-06-25 | High | `[ ] Pending` | None |
+| `TASK-003` | Constant speed telemetry dropout (drops to 0 km/h) | 2026-06-25 | High | `[/] In-Progress` | `C:/Users/strmshdw/.gemini/antigravity-ide/scratch/worktrees/task-003` |
 | `TASK-004` | Orient field horizontally to maximize visibility | 2026-06-25 | High | `[x] Completed` | None |
 | `TASK-005` | Match player circles and name text colors to team colors | 2026-06-25 | High | `[x] Completed` | None |
 | `TASK-006` | Correct boost pad coordinates and remove duplicate layout | 2026-06-25 | High | `[x] Completed` | None |
@@ -32,7 +32,7 @@ To prevent collisions, parallel work occurs in isolated git worktrees.
 
 | Worktree Path | Branch | Target Task | Created | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| None | None | None | - | - |
+| `C:/Users/strmshdw/.gemini/antigravity-ide/scratch/worktrees/task-003` | `feature/speed-dropout` | `TASK-003` | 2026-06-25 | `Active` |
 
 ---
 
