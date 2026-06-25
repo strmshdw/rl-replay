@@ -15,46 +15,42 @@ class ReplayArena {
         
         this.resize();
         
-        // Static boost pad coordinates
+        // Static boost pad coordinates (standard Rocket League Soccar maps)
         this.boostPads = [
-            // 6 Large pads
-            { x: 3072, y: 4096, isLarge: true },
+            { x: -3584, y: -2484, isLarge: false },
+            { x: 1788, y: -2302, isLarge: false },
+            { x: -1792, y: -4184, isLarge: false },
+            { x: 1792, y: -4184, isLarge: false },
+            { x: -940, y: -3308, isLarge: false },
+            { x: 940, y: -3308, isLarge: false },
+            { x: 3584, y: -2484, isLarge: false },
+            { x: 0, y: 1024, isLarge: false },
+            { x: -2048, y: 1036, isLarge: false },
+            { x: -1788, y: 2302, isLarge: false },
+            { x: 2048, y: 1036, isLarge: false },
+            { x: 1788, y: 2302, isLarge: false },
+            { x: 2048, y: -1036, isLarge: false },
+            { x: 3584, y: 2484, isLarge: false },
+            { x: 1792, y: 4184, isLarge: false },
+            { x: -1792, y: 4184, isLarge: false },
+            { x: 0, y: 2816, isLarge: false },
+            { x: -940, y: 3308, isLarge: false },
+            { x: -3584, y: 2484, isLarge: false },
+            { x: 940, y: 3308, isLarge: false },
+            { x: 0, y: 4240, isLarge: false },
+            { x: -1788, y: -2302, isLarge: false },
+            { x: 1024, y: 0, isLarge: false },
+            { x: 0, y: -1024, isLarge: false },
+            { x: -1024, y: 0, isLarge: false },
+            { x: 0, y: -4240, isLarge: false },
+            { x: 0, y: -2816, isLarge: false },
+            { x: -3584, y: 0, isLarge: true },
+            { x: 3584, y: 0, isLarge: true },
             { x: -3072, y: 4096, isLarge: true },
             { x: 3072, y: -4096, isLarge: true },
             { x: -3072, y: -4096, isLarge: true },
-            { x: 3072, y: 0, isLarge: true },
-            { x: -3072, y: 0, isLarge: true },
-            
-            // Representative small pads
-            { x: 0, y: 0, isLarge: false },
-            { x: -1000, y: 0, isLarge: false },
-            { x: 1000, y: 0, isLarge: false },
-            { x: 0, y: -1000, isLarge: false },
-            { x: 0, y: 1000, isLarge: false },
-            
-            { x: -1000, y: -1000, isLarge: false },
-            { x: 1000, y: -1000, isLarge: false },
-            { x: -1000, y: 1000, isLarge: false },
-            { x: 1000, y: 1000, isLarge: false },
-            
-            { x: 0, y: -2800, isLarge: false },
-            { x: 0, y: 2800, isLarge: false },
-            { x: -1800, y: -2500, isLarge: false },
-            { x: 1800, y: -2500, isLarge: false },
-            { x: -1800, y: 2500, isLarge: false },
-            { x: 1800, y: 2500, isLarge: false },
-            
-            { x: -2800, y: -1800, isLarge: false },
-            { x: 2800, y: -1800, isLarge: false },
-            { x: -2800, y: 1800, isLarge: false },
-            { x: 2800, y: 1800, isLarge: false },
-            
-            { x: 0, y: -4600, isLarge: false },
-            { x: 0, y: 4600, isLarge: false },
-            { x: -1000, y: -4200, isLarge: false },
-            { x: 1000, y: -4200, isLarge: false },
-            { x: -1000, y: 4200, isLarge: false },
-            { x: 1000, y: 4200, isLarge: false }
+            { x: 3072, y: 4096, isLarge: true },
+            { x: -2048, y: -1036, isLarge: false }
         ];
     }
 
