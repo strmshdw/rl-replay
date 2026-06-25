@@ -70,32 +70,34 @@ class ReplayArena {
         const availWidth = this.canvas.width - 2 * this.padding;
         const availHeight = this.canvas.height - 2 * this.padding;
         
-        const scaleX = availWidth / (2 * this.fieldXMax);
-        const scaleY = availHeight / (2 * this.fieldYMax);
+        // Horizontal orientation:
+        // Screen width maps to length (2 * fieldYMax)
+        // Screen height maps to width (2 * fieldXMax)
+        const scaleX = availWidth / (2 * this.fieldYMax);
+        const scaleY = availHeight / (2 * this.fieldXMax);
         
         // Preserve aspect ratio by using the smaller scale factor
         this.scale = Math.min(scaleX, scaleY);
         
         // Center the field on canvas
-        this.offsetX = this.padding + (availWidth - (2 * this.fieldXMax) * this.scale) / 2;
-        this.offsetY = this.padding + (availHeight - (2 * this.fieldYMax) * this.scale) / 2;
+        this.offsetX = this.padding + (availWidth - (2 * this.fieldYMax) * this.scale) / 2;
+        this.offsetY = this.padding + (availHeight - (2 * this.fieldXMax) * this.scale) / 2;
     }
 
-    // Convert game coordinate X to Canvas coordinate X
-    toCanvasX(x) {
-        return this.offsetX + (x + this.fieldXMax) * this.scale;
+    // Convert game coordinate Y to Canvas coordinate X (horizontal)
+    toCanvasX(y) {
+        return this.offsetX + (y + this.fieldYMax) * this.scale;
     }
 
-    // Convert game coordinate Y to Canvas coordinate Y (Rocket League Y goes up to orange goal, down to blue)
-    toCanvasY(y) {
-        // Flip Y-axis for top-down view
-        return this.canvas.height - (this.offsetY + (y + this.fieldYMax) * this.scale);
+    // Convert game coordinate X to Canvas coordinate Y (vertical, flipped)
+    toCanvasY(x) {
+        return this.offsetY + (-x + this.fieldXMax) * this.scale;
     }
 
     // Convert Canvas coordinate to Game coordinates (useful for clicks or mapping back)
     toGameCoords(cx, cy) {
-        const gx = ((cx - this.offsetX) / this.scale) - this.fieldXMax;
-        const gy = ((this.canvas.height - cy - this.offsetY) / this.scale) - this.fieldYMax;
+        const gy = ((cx - this.offsetX) / this.scale) - this.fieldYMax;
+        const gx = -(((cy - this.offsetY) / this.scale) - this.fieldXMax);
         return { x: gx, y: gy };
     }
 
@@ -115,23 +117,23 @@ class ReplayArena {
         const gridCellsX = 8;
         const gridCellsY = 10;
         
-        // Draw vertical grid lines
-        for (let i = 0; i <= gridCellsX; i++) {
-            const xVal = -4096 + (i / gridCellsX) * 8192;
-            const cx = this.toCanvasX(xVal);
+        // Draw vertical grid lines (constant game Y on screen horizontal)
+        for (let i = 0; i <= gridCellsY; i++) {
+            const yVal = -5120 + (i / gridCellsY) * 10240;
+            const cx = this.toCanvasX(yVal);
             ctx.beginPath();
-            ctx.moveTo(cx, this.toCanvasY(-5120));
-            ctx.lineTo(cx, this.toCanvasY(5120));
+            ctx.moveTo(cx, this.toCanvasY(-4096));
+            ctx.lineTo(cx, this.toCanvasY(4096));
             ctx.stroke();
         }
         
-        // Draw horizontal grid lines
-        for (let i = 0; i <= gridCellsY; i++) {
-            const yVal = -5120 + (i / gridCellsY) * 10240;
-            const cy = this.toCanvasY(yVal);
+        // Draw horizontal grid lines (constant game X on screen vertical)
+        for (let i = 0; i <= gridCellsX; i++) {
+            const xVal = -4096 + (i / gridCellsX) * 8192;
+            const cy = this.toCanvasY(xVal);
             ctx.beginPath();
-            ctx.moveTo(this.toCanvasX(-4096), cy);
-            ctx.lineTo(this.toCanvasX(4096), cy);
+            ctx.moveTo(this.toCanvasX(-5120), cy);
+            ctx.lineTo(this.toCanvasX(5120), cy);
             ctx.stroke();
         }
 
@@ -141,83 +143,81 @@ class ReplayArena {
         
         const cornerRadius = 1620 * this.scale;
         
-        // Left side walls and corner arcs
+        // Top side walls and corner arcs
         ctx.beginPath();
-        // Start at left orange goalpost
-        ctx.moveTo(this.toCanvasX(-892), this.toCanvasY(5120));
+        // Start at top blue goalpost
+        ctx.moveTo(this.toCanvasX(-5120), this.toCanvasY(892));
         // Line to top-left corner start
-        ctx.lineTo(this.toCanvasX(-2476), this.toCanvasY(5120));
-        // Top-left corner arc (from top wall to left wall)
-        ctx.arc(this.toCanvasX(-2476), this.toCanvasY(3500), cornerRadius, 1.5 * Math.PI, Math.PI, true);
+        ctx.lineTo(this.toCanvasX(-5120), this.toCanvasY(2476));
+        // Top-left corner arc
+        ctx.arc(this.toCanvasX(-3500), this.toCanvasY(2476), cornerRadius, Math.PI, 1.5 * Math.PI, false);
         // Line to bottom-left corner start
-        ctx.lineTo(this.toCanvasX(-4096), this.toCanvasY(-3500));
-        // Bottom-left corner arc (from left wall to bottom wall)
-        ctx.arc(this.toCanvasX(-2476), this.toCanvasY(-3500), cornerRadius, Math.PI, 0.5 * Math.PI, true);
-        // Line to left blue goalpost
-        ctx.lineTo(this.toCanvasX(-892), this.toCanvasY(-5120));
+        ctx.lineTo(this.toCanvasX(3500), this.toCanvasY(4096));
+        // Top-right corner arc
+        ctx.arc(this.toCanvasX(3500), this.toCanvasY(2476), cornerRadius, 1.5 * Math.PI, 2 * Math.PI, false);
+        // Line to top orange goalpost
+        ctx.lineTo(this.toCanvasX(5120), this.toCanvasY(892));
         ctx.stroke();
         
-        // Right side walls and corner arcs
+        // Bottom side walls and corner arcs
         ctx.beginPath();
-        // Start at right blue goalpost
-        ctx.moveTo(this.toCanvasX(892), this.toCanvasY(-5120));
+        // Start at bottom orange goalpost
+        ctx.moveTo(this.toCanvasX(5120), this.toCanvasY(-892));
         // Line to bottom-right corner start
-        ctx.lineTo(this.toCanvasX(2476), this.toCanvasY(-5120));
-        // Bottom-right corner arc (from bottom wall to right wall)
-        ctx.arc(this.toCanvasX(2476), this.toCanvasY(-3500), cornerRadius, 0.5 * Math.PI, 0, true);
-        // Line to top-right corner start
-        ctx.lineTo(this.toCanvasX(4096), this.toCanvasY(3500));
-        // Top-right corner arc (from right wall to top wall)
-        ctx.arc(this.toCanvasX(2476), this.toCanvasY(3500), cornerRadius, 0, 1.5 * Math.PI, true);
-        // Line to right orange goalpost
-        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(5120));
+        ctx.lineTo(this.toCanvasX(5120), this.toCanvasY(-2476));
+        // Bottom-right corner arc
+        ctx.arc(this.toCanvasX(3500), this.toCanvasY(-2476), cornerRadius, 0, 0.5 * Math.PI, false);
+        // Line to bottom-left corner start
+        ctx.lineTo(this.toCanvasX(-3500), this.toCanvasY(-4096));
+        // Bottom-left corner arc
+        ctx.arc(this.toCanvasX(-3500), this.toCanvasY(-2476), cornerRadius, 0.5 * Math.PI, Math.PI, false);
+        // Line to bottom blue goalpost
+        ctx.lineTo(this.toCanvasX(-5120), this.toCanvasY(-892));
         ctx.stroke();
 
         // Goal lines (mouth of the goals)
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(this.toCanvasX(-892), this.toCanvasY(-5120));
-        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(-5120));
-        ctx.moveTo(this.toCanvasX(-892), this.toCanvasY(5120));
-        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(5120));
+        ctx.moveTo(this.toCanvasX(-5120), this.toCanvasY(-892));
+        ctx.lineTo(this.toCanvasX(-5120), this.toCanvasY(892));
+        ctx.moveTo(this.toCanvasX(5120), this.toCanvasY(-892));
+        ctx.lineTo(this.toCanvasX(5120), this.toCanvasY(892));
         ctx.stroke();
 
         // Center line & circle
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.lineWidth = 1.5;
-        const yMid = this.toCanvasY(0);
         ctx.beginPath();
-        ctx.moveTo(this.toCanvasX(-4096), yMid);
-        ctx.lineTo(this.toCanvasX(4096), yMid);
+        ctx.moveTo(this.toCanvasX(0), this.toCanvasY(-4096));
+        ctx.lineTo(this.toCanvasX(0), this.toCanvasY(4096));
         ctx.stroke();
 
         ctx.beginPath();
-        const xMid = this.toCanvasX(0);
-        ctx.arc(xMid, yMid, 1000 * this.scale, 0, Math.PI * 2);
+        ctx.arc(this.toCanvasX(0), this.toCanvasY(0), 1000 * this.scale, 0, Math.PI * 2);
         ctx.stroke();
 
         // Draw Goals
-        // Blue Goal (Y = -5120 to -6000)
+        // Blue Goal (Y = -5120 to -6000, left side)
         ctx.strokeStyle = 'rgba(0, 210, 255, 0.6)';
         ctx.shadowColor = 'rgba(0, 210, 255, 0.3)';
         ctx.shadowBlur = 8;
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(this.toCanvasX(-892), this.toCanvasY(-5120));
-        ctx.lineTo(this.toCanvasX(-892), this.toCanvasY(-6000));
-        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(-6000));
-        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(-5120));
+        ctx.moveTo(this.toCanvasX(-5120), this.toCanvasY(892));
+        ctx.lineTo(this.toCanvasX(-6000), this.toCanvasY(892));
+        ctx.lineTo(this.toCanvasX(-6000), this.toCanvasY(-892));
+        ctx.lineTo(this.toCanvasX(-5120), this.toCanvasY(-892));
         ctx.stroke();
 
-        // Orange Goal (Y = 5120 to 6000)
+        // Orange Goal (Y = 5120 to 6000, right side)
         ctx.strokeStyle = 'rgba(255, 123, 0, 0.6)';
         ctx.shadowColor = 'rgba(255, 123, 0, 0.3)';
         ctx.beginPath();
-        ctx.moveTo(this.toCanvasX(-892), this.toCanvasY(5120));
-        ctx.lineTo(this.toCanvasX(-892), this.toCanvasY(6000));
-        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(6000));
-        ctx.lineTo(this.toCanvasX(892), this.toCanvasY(5120));
+        ctx.moveTo(this.toCanvasX(5120), this.toCanvasY(892));
+        ctx.lineTo(this.toCanvasX(6000), this.toCanvasY(892));
+        ctx.lineTo(this.toCanvasX(6000), this.toCanvasY(-892));
+        ctx.lineTo(this.toCanvasX(5120), this.toCanvasY(-892));
         ctx.stroke();
 
         // Reset shadow
@@ -226,8 +226,8 @@ class ReplayArena {
         // Draw Boost Pads
         if (options.showBoost) {
             this.boostPads.forEach(pad => {
-                const px = this.toCanvasX(pad.x);
-                const py = this.toCanvasY(pad.y);
+                const px = this.toCanvasX(pad.y);
+                const py = this.toCanvasY(pad.x);
                 
                 ctx.fillStyle = pad.isLarge ? 'rgba(255, 196, 0, 0.25)' : 'rgba(255, 230, 100, 0.12)';
                 ctx.strokeStyle = pad.isLarge ? 'rgba(255, 196, 0, 0.5)' : 'rgba(255, 230, 100, 0.2)';
@@ -255,9 +255,9 @@ class ReplayArena {
             if (path.length < 2) return;
 
             ctx.beginPath();
-            ctx.moveTo(this.toCanvasX(path[0].x), this.toCanvasY(path[0].y));
+            ctx.moveTo(this.toCanvasX(path[0].y), this.toCanvasY(path[0].x));
             for (let i = 1; i < path.length; i++) {
-                ctx.lineTo(this.toCanvasX(path[i].x), this.toCanvasY(path[i].y));
+                ctx.lineTo(this.toCanvasX(path[i].y), this.toCanvasY(path[i].x));
             }
             ctx.stroke();
         });
@@ -276,8 +276,8 @@ class ReplayArena {
         
         for (let i = 0; i < points.length; i += step) {
             const pt = points[i];
-            const px = this.toCanvasX(pt.x);
-            const py = this.toCanvasY(pt.y);
+            const px = this.toCanvasX(pt.y);
+            const py = this.toCanvasY(pt.x);
             const radius = 25;
 
             const grad = ctx.createRadialGradient(px, py, 1, px, py, radius);
@@ -296,8 +296,8 @@ class ReplayArena {
 
     drawBall(ball) {
         const ctx = this.ctx;
-        const bx = this.toCanvasX(ball.x);
-        const by = this.toCanvasY(ball.y);
+        const bx = this.toCanvasX(ball.y);
+        const by = this.toCanvasY(ball.x);
         
         // Z height scales from ~92 (ground) to ~2000 (ceiling)
         const heightScale = Math.max(0, ball.z - 92) / 1900;
@@ -350,8 +350,8 @@ class ReplayArena {
 
         Object.keys(players).forEach(name => {
             const p = players[name];
-            const px = this.toCanvasX(p.x);
-            const py = this.toCanvasY(p.y);
+            const px = this.toCanvasX(p.y);
+            const py = this.toCanvasY(p.x);
             const team = playerTeams[name];
             
             const color = team === 0 ? 'var(--color-blue)' : 'var(--color-orange)';
@@ -371,13 +371,12 @@ class ReplayArena {
             ctx.lineWidth = 2.5;
             ctx.beginPath();
             ctx.moveTo(px, py);
-            // Rocket League yaw points along local X-axis, compute endpoints
-            // Math.cos/sin(yaw) gives heading
-            const headingX = Math.cos(p.yaw);
-            const headingY = Math.sin(p.yaw);
-            
-            // Visualizer coordinates are Z-up Y-inverted. Scale arrow length to 15px
-            ctx.lineTo(px + headingX * 14, py - headingY * 14);
+            // In horizontal visualizer, yaw mapping is rotated:
+            // dx maps to sin(yaw)
+            // dy maps to -cos(yaw)
+            const arrowDx = Math.sin(p.yaw) * 14;
+            const arrowDy = -Math.cos(p.yaw) * 14;
+            ctx.lineTo(px + arrowDx, py + arrowDy);
             ctx.stroke();
 
             // 3. Draw Boost Ring overlay around dot
