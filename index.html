@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RL-Replay | Rocket League Telemetry Visualizer</title>
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div class="glass-bg-glow"></div>
+    <div class="app-container">
+        <!-- Sidebar Controls -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <span class="logo-icon">🏎️</span>
+                <h1>RL-REPLAY</h1>
+            </div>
+
+            <!-- Upload Panel -->
+            <div class="card upload-card">
+                <h3>Ingest Replay</h3>
+                <div class="drag-zone" id="dropZone">
+                    <span class="upload-icon">📂</span>
+                    <p class="primary-text">Drag & drop json replay</p>
+                    <p class="secondary-text">or click to browse</p>
+                    <input type="file" id="fileInput" accept=".json" style="display: none;">
+                </div>
+                <button class="btn secondary-btn" id="loadExampleBtn">Load Example Match</button>
+                <div class="loading-bar-container" id="loadingContainer" style="display: none;">
+                    <div class="loading-bar-label">
+                        <span id="loadingStatus">Parsing telemetry...</span>
+                        <span id="loadingPercent">0%</span>
+                    </div>
+                    <div class="loading-bar-track">
+                        <div class="loading-bar-fill" id="loadingFill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Playback Panel -->
+            <div class="card playback-card">
+                <h3>Playback Speed</h3>
+                <div class="speed-controls">
+                    <button class="speed-btn" data-speed="0.25">0.25x</button>
+                    <button class="speed-btn" data-speed="0.5">0.5x</button>
+                    <button class="speed-btn active" data-speed="1.0">1.0x</button>
+                    <button class="speed-btn" data-speed="2.0">2.0x</button>
+                </div>
+
+                <h3>Overlay Settings</h3>
+                <div class="toggle-list">
+                    <label class="toggle-item">
+                        <input type="checkbox" id="togglePaths" checked>
+                        <span class="toggle-label">Player Trajectories</span>
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" id="toggleHeatmap">
+                        <span class="toggle-label">Position Heatmap</span>
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" id="toggleNames" checked>
+                        <span class="toggle-label">Player Names</span>
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" id="toggleBoost" checked>
+                        <span class="toggle-label">Boost Pad Overlay</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Active Players List -->
+            <div class="card players-card">
+                <h3>Active Telemetry</h3>
+                <div id="playersList" class="players-list">
+                    <p class="empty-state">No active replay data loaded.</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Screen -->
+        <main class="main-content">
+            <!-- Header Status -->
+            <header class="match-header card">
+                <div class="match-meta">
+                    <h2 id="matchTitle">No Match Loaded</h2>
+                    <p id="matchSub">Load a parsed replay JSON to visualize the telemetry</p>
+                </div>
+                <div class="scoreboard" id="scoreboard" style="display: none;">
+                    <div class="score-team team-blue">
+                        <span class="team-name">BLUE</span>
+                        <span class="team-score" id="scoreBlue">0</span>
+                    </div>
+                    <div class="score-divider">:</div>
+                    <div class="score-team team-orange">
+                        <span class="team-score" id="scoreOrange">0</span>
+                        <span class="team-name">ORANGE</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Visualizer Container -->
+            <section class="visualizer-container card">
+                <div class="canvas-wrapper">
+                    <canvas id="arenaCanvas"></canvas>
+                </div>
+                
+                <!-- Playback Timeline controls -->
+                <div class="playback-timeline-bar">
+                    <button class="play-btn" id="playPauseBtn" disabled>
+                        <span class="play-icon">▶</span>
+                    </button>
+                    <div class="time-display" id="timeDisplay">00:00 / 05:00</div>
+                    <div class="timeline-container">
+                        <input type="range" id="timelineScrubber" min="0" max="100" value="0" step="0.01" disabled>
+                        <div class="timeline-ticks" id="timelineTicks"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Analytics Panel -->
+            <section class="analytics-panel card" id="analyticsPanel" style="display: none;">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="tab-overview">Match Statistics</button>
+                    <button class="tab-btn" data-tab="tab-boost">Boost Metrics</button>
+                    <button class="tab-btn" data-tab="tab-positioning">Spatial Heatmaps</button>
+                </div>
+
+                <div class="tab-content active" id="tab-overview">
+                    <div class="stats-table-wrapper" id="overviewStatsGrid">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-boost">
+                    <div class="charts-grid">
+                        <div class="chart-box">
+                            <h4>Average Boost Uptime</h4>
+                            <div class="custom-svg-chart" id="boostLevelChart"></div>
+                        </div>
+                        <div class="chart-box">
+                            <h4>Supersonic vs Defensive Split</h4>
+                            <div class="custom-svg-chart" id="speedDistChart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-positioning">
+                    <div class="heatmaps-controls">
+                        <h4>Configure Spatial Analytics Overlay</h4>
+                        <p class="secondary-text">Select player to overlay individual heatmap path density</p>
+                        <div class="heatmap-toggles-grid" id="heatmapToggles">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Application scripts -->
+    <script src="js/parser.js"></script>
+    <script src="js/arena.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/analytics.js"></script>
+</body>
+</html>
