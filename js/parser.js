@@ -109,7 +109,7 @@ class ReplayParser {
                                             // 1. Try linear velocity vector from physics
                                             if (rbState.LinearVelocity) {
                                                 const lv = rbState.LinearVelocity;
-                                                const mag = Math.sqrt(lv.X*lv.X + lv.Y*lv.Y + lv.Z*lv.Z);
+                                                const mag = Math.sqrt(lv.X*lv.X + lv.Y*lv.Y + lv.Z*lv.Z) / 100;
                                                 speedKmh = Math.min(141, Math.round(mag * 0.036));
                                                 speedCalculated = true;
                                             }
