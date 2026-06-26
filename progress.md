@@ -43,7 +43,7 @@ No code is merged without passing the verification loop (maker/checker split).
 | :--- | :--- | :--- | :--- | :--- |
 | `TASK-001` | System Verifier | `git status` | `Passed (clean)` | `Verified` |
 | `TASK-002` | System Verifier | Browser Subagent | `Passed (aspect ratio & rounded corners perfect)` | `Verified` |
-| `TASK-003` | User (Manual) | N/A | `Deferred to User` | `Verified` |
+| `TASK-003` | User | Manual Verification | `Passed (manually verified by user)` | `Verified` |
 | `TASK-004` | System Verifier | Browser Subagent | `Passed (horizontal field layout and player tracking correct)` | `Verified` |
 | `TASK-005` | System Verifier | Browser Subagent | `Passed (player markers and names render in blue/orange)` | `Verified` |
 | `TASK-006` | System Verifier | Browser Subagent | `Passed (exact 34 boost pads parsed from res/boostpads.json match layout)` | `Verified` |
@@ -51,7 +51,7 @@ No code is merged without passing the verification loop (maker/checker split).
 ---
 
 ## 📜 Execution History
-- **2026-06-26**: TASK-003 (Constant speed telemetry dropout) completed; verification deferred to user.
+- **2026-06-26**: TASK-003 (Constant speed telemetry dropout) completed; manually verified by user.
 - **2026-06-25**: TASK-006 (Correct boost pad coordinates) completed and verified with 34 pads from res/boostpads.json.
 - **2026-06-25**: TASK-005 (Color player dots and text) completed and verified with direct hex colors.
 - **2026-06-25**: TASK-004 (Orient field horizontally) completed and verified with 90-degree CCW projection layout.
