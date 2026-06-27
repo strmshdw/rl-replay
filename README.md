@@ -83,7 +83,17 @@ Run the PowerShell orchestrator script to inspect the loop state:
 .\scripts\run-loop.ps1 status
 ```
 
-### Step 3: Run Triage
+### Step 3: Run the Visualizer Web App
+Start the local HTTP server and automatically open it in your browser:
+```powershell
+.\scripts\run-server.ps1
+```
+You can also specify a custom port:
+```powershell
+.\scripts\run-server.ps1 -Port 3000
+```
+
+### Step 4: Run Triage
 Do a local git status and recent log check:
 ```powershell
 .\scripts\run-loop.ps1 triage
