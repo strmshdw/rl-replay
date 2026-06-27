@@ -32,6 +32,8 @@ class ReplayParser {
                 const lastUpdatePos = {};    // PlayerName -> { x, y, z, time }
                 let currentBall = { x: 0, y: 0, z: 0 };
                 let ballActorId = null;
+                let gameEventActorId = null;
+                let currentGameState = 'Countdown';
 
                 const frames = [];
                 const totalFrames = jsonData.Frames.length;
@@ -64,6 +66,19 @@ class ReplayParser {
                                 // Ball detection
                                 if (update.ClassName === 'TAGame.Ball_TA') {
                                     ballActorId = id;
+                                }
+
+                                // GameEvent detection
+                                if (update.ClassName === 'TAGame.GameEvent_Soccar_TA') {
+                                    gameEventActorId = id;
+                                }
+
+                                // Track Game State Name
+                                if (gameEventActorId && id === gameEventActorId) {
+                                    const stateProp = update['TAGame.GameEvent_TA:ReplicatedStateName'];
+                                    if (stateProp !== undefined) {
+                                        currentGameState = jsonData.Names[stateProp] || 'Countdown';
+                                    }
                                 }
 
                                 // PRI -> Name mapping
@@ -173,7 +188,8 @@ class ReplayParser {
                         const frameSnapshot = {
                             time: time,
                             ball: { ...currentBall },
-                            players: {}
+                            players: {},
+                            state: currentGameState
                         };
 
                         Object.keys(currentPositions).forEach(name => {

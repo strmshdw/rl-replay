@@ -41,7 +41,8 @@ class ReplayAnalytics {
                 supersonicFrames: 0,
                 boostSpeedFrames: 0,
                 slowFrames: 0,
-                totalFrames: 0
+                totalFrames: 0,
+                accumulatedSpeed: 0
             };
         });
 
@@ -50,6 +51,9 @@ class ReplayAnalytics {
             const frame = frames[i];
             const prevFrame = i > 0 ? frames[i - 1] : null;
             const dt = prevFrame ? frame.time - prevFrame.time : 0.033;
+            
+            // Only count active gameplay frames for statistics
+            const isActiveFrame = frame.state === undefined || frame.state === 'Active';
             
             Object.keys(frame.players).forEach(name => {
                 const p = frame.players[name];
@@ -60,7 +64,7 @@ class ReplayAnalytics {
                 }
                 
                 // Boost stats tracking
-                if (this.boostStats[name]) {
+                if (this.boostStats[name] && isActiveFrame) {
                     const stats = this.boostStats[name];
                     stats.accumulatedBoost += p.boost;
                     stats.frameCount++;
@@ -79,27 +83,20 @@ class ReplayAnalytics {
                     }
                 }
                 
-                // Speed stats tracking
-                if (this.speedStats[name] && prevFrame && prevFrame.players[name]) {
-                    const prevP = prevFrame.players[name];
-                    const dx = p.x - prevP.x;
-                    const dy = p.y - prevP.y;
-                    const dz = p.z - prevP.z;
-                    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                // Speed stats tracking (active frames only)
+                if (this.speedStats[name] && isActiveFrame) {
+                    const stats = this.speedStats[name];
+                    stats.totalFrames++;
+                    stats.accumulatedSpeed += p.speed;
                     
-                    if (dt > 0) {
-                        // cm/s speed
-                        const speed = dist / dt; 
-                        const stats = this.speedStats[name];
-                        stats.totalFrames++;
-                        
-                        if (speed > 2200) {
-                            stats.supersonicFrames++;
-                        } else if (speed > 1400) {
-                            stats.boostSpeedFrames++;
-                        } else {
-                            stats.slowFrames++;
-                        }
+                    // Supersonic speed threshold: ~79 km/h (2200 UU/s)
+                    // Boosting speed threshold: ~50 km/h (1400 UU/s)
+                    if (p.speed >= 79) {
+                        stats.supersonicFrames++;
+                    } else if (p.speed >= 50) {
+                        stats.boostSpeedFrames++;
+                    } else {
+                        stats.slowFrames++;
                     }
                 }
             });
@@ -139,10 +136,7 @@ class ReplayAnalytics {
             let avgSpeedKmh = 0;
             const speed = this.speedStats[p.Name];
             if (speed && speed.totalFrames > 0) {
-                const supersonicPct = speed.supersonicFrames / speed.totalFrames;
-                const boostPct = speed.boostSpeedFrames / speed.totalFrames;
-                // Weighted speed approximation
-                avgSpeedKmh = Math.round(30 + boostPct * 50 + supersonicPct * 110);
+                avgSpeedKmh = Math.round(speed.accumulatedSpeed / speed.totalFrames);
             }
             
             // Average boost
