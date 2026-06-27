@@ -6,7 +6,7 @@ This file serves as the persistent state memory for the automated loop. The agen
 
 ## 🔄 Current Loop Status
 - **Last Run**: 2026-06-26 (Completed Script Version Cache Busting)
-- **Active Iteration**: None
+- **Active Iteration**: TASK-013
 - **System Health**: Green 🟢
 
 ---
@@ -28,6 +28,7 @@ These items are discovered by the automated triage schedule. They must be valida
 | `TASK-010` | Display average boost as raw amount instead of percentage | 2026-06-26 | Medium | `[x] Completed` | None |
 | `TASK-011` | Only include active cars in frame snapshots and clean up player state on demolition | 2026-06-26 | High | `[x] Completed` | None |
 | `TASK-012` | Update script cache-busting version parameters to force browser reload | 2026-06-26 | Medium | `[x] Completed` | None |
+| `TASK-013` | Skip non-active states during replay playback | 2026-06-26 | High | `[/] In-Progress` | `C:/Users/strmshdw/.gemini/antigravity-ide/scratch/worktrees/task-013` |
 
 *Status options: `[ ] Pending`, `[/] In-Progress`, `[x] Completed`, `[!] Failed`*
 
@@ -38,7 +39,7 @@ To prevent collisions, parallel work occurs in isolated git worktrees.
 
 | Worktree Path | Branch | Target Task | Created | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| - | - | - | - | - |
+| `C:/Users/strmshdw/.gemini/antigravity-ide/scratch/worktrees/task-013` | `feature/playback-skip` | `TASK-013` | 2026-06-26 | `Active` |
 
 ---
 
@@ -59,6 +60,7 @@ No code is merged without passing the verification loop (maker/checker split).
 | `TASK-010` | User | Manual Verification | `Passed (manually verified by user)` | `Verified` |
 | `TASK-011` | User | Manual Verification | `Passed (manually verified by user)` | `Verified` |
 | `TASK-012` | User | Manual Verification | `Passed (manually verified by user)` | `Verified` |
+| `TASK-013` | System Verifier | Manual Verify | Pending | Pending |
 
 ---
 
