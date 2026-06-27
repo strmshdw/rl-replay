@@ -321,8 +321,18 @@ class ReplayArena {
             ctx.setLineDash([]); // reset
         }
 
-        // 3. Draw Actual Ball (scaled by height slightly to give perspective)
-        const ballRadius = 8 + heightScale * 4;
+        // 3. Draw Actual Ball (outer static boundary + scaling inner core)
+        const maxBallRadius = 12;
+        const ballRadius = 6 + heightScale * 6; // Inner core scales with height
+
+        // Draw outer static boundary circle
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(bx, by, maxBallRadius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Draw scaling inner core
         const grad = ctx.createRadialGradient(bx - ballRadius*0.3, by - ballRadius*0.3, 1, bx, by, ballRadius);
         grad.addColorStop(0, '#ffffff');
         grad.addColorStop(0.4, '#d8dee9');
@@ -353,16 +363,38 @@ class ReplayArena {
             const color = team === 0 ? '#00d2ff' : '#ff7b00';
             const colorGlow = team === 0 ? 'rgba(0, 210, 255, 0.4)' : 'rgba(255, 123, 0, 0.4)';
             
-            // 1. Draw Player Marker Dot
+            const playerHeightScale = Math.min(1.0, Math.max(0, p.z - 17) / 1983);
+
+            // 1. Draw Player Drop Shadow & Height Line (if in the air)
+            const shadowOffsetX = playerHeightScale * 15;
+            const shadowOffsetY = playerHeightScale * 15;
+            if (p.z > 50) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+                ctx.beginPath();
+                ctx.arc(px + shadowOffsetX, py + shadowOffsetY, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([2, 3]);
+                ctx.beginPath();
+                ctx.moveTo(px + shadowOffsetX, py + shadowOffsetY);
+                ctx.lineTo(px, py);
+                ctx.stroke();
+                ctx.setLineDash([]); // reset
+            }
+
+            // 2. Draw Player Marker Dot (inner core scales with height)
+            const playerRadius = 4 + playerHeightScale * 4; // ranges from 4 to 8
             ctx.fillStyle = color;
             ctx.shadowColor = color;
             ctx.shadowBlur = 6;
             ctx.beginPath();
-            ctx.arc(px, py, 7, 0, Math.PI * 2);
+            ctx.arc(px, py, playerRadius, 0, Math.PI * 2);
             ctx.fill();
             ctx.shadowBlur = 0; // reset
 
-            // 2. Draw Orientation Vector Arrow (Yaw direction)
+            // 3. Draw Orientation Vector Arrow (Yaw direction)
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2.5;
             ctx.beginPath();
@@ -375,7 +407,7 @@ class ReplayArena {
             ctx.lineTo(px + arrowDx, py + arrowDy);
             ctx.stroke();
 
-            // 3. Draw Boost Ring overlay around dot
+            // 4. Draw Boost Ring overlay / static faint outer circle boundary
             if (options.showBoostRing) {
                 ctx.strokeStyle = colorGlow;
                 ctx.lineWidth = 2;
@@ -390,6 +422,13 @@ class ReplayArena {
                 // 100% boost is full circle. Start at top (-PI/2)
                 const boostArc = (p.boost / 100) * (Math.PI * 2);
                 ctx.arc(px, py, 11, -Math.PI / 2, -Math.PI / 2 + boostArc);
+                ctx.stroke();
+            } else {
+                // Draw static faint boundary circle representing the footprint
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(px, py, 11, 0, Math.PI * 2);
                 ctx.stroke();
             }
 
