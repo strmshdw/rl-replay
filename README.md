@@ -46,60 +46,14 @@ rl-replay/
 
 ---
 
-## 🧭 Loop Engineering Workflow
-
-This repository runs on the **Loop Engineering** lifecycle (discovery, isolation, implementation, and verification). The agent develops features and resolves backlog tasks automatically.
-
-### 1. State Tracking (`progress.md`)
-The [progress.md](file:///d:/code/rl-replay/progress.md) file acts as the repository's database. It tracks:
-* Active iteration details and overall system health.
-* Discovered issues and pending backlog tasks.
-* Active Git Worktrees.
-* Verification test statuses.
-
-### 2. Worktree Isolation
-To prevent branch collisions when working on features or bug fixes in parallel, use the `$worktree-isolation` skill instructions. 
-Always create a dedicated git worktree in the scratch workspace for your changes:
-```powershell
-git worktree add -b <branch-name> C:\Users\strmshdw\.gemini\antigravity-ide\scratch\worktrees\<task-id> main
-```
-
-### 3. Maker/Checker Verification
-Before checking in code:
-1. Run target tests in your active worktree.
-2. Run standard verification checks (`git status`, linters, or test suites).
-3. Log results to the **Verification Board** in `progress.md`.
-
----
-
 ## 🚀 Quick Start Guide
 
-### Step 1: Open Workspace
-Set this directory (`d:/code/rl-replay`) as your active workspace in your agent IDE to load local rules and skills.
-
-### Step 2: Check Loop Status
-Run the PowerShell orchestrator script to inspect the loop state:
-```powershell
-.\scripts\run-loop.ps1 status
-```
-
-### Step 3: Run the Visualizer Web App
-Start the local HTTP server and automatically open it in your browser:
+Start the local HTTP server and automatically open the visualizer web app in your browser:
 ```powershell
 .\scripts\run-server.ps1
 ```
-You can also specify a custom port:
+
+You can also specify a custom port if the default port `8000` is already in use:
 ```powershell
 .\scripts\run-server.ps1 -Port 3000
 ```
-
-### Step 4: Run Triage
-Do a local git status and recent log check:
-```powershell
-.\scripts\run-loop.ps1 triage
-```
-
-### Step 4: Run the Goal Automation
-Recommend `/goal` to kick off automated task cycles:
-* *"Use `/goal` to triage and implement the highest priority pending task"*
-* *"Use `/goal` to implement the basic parser layout, verify, and merge"*
