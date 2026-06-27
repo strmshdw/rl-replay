@@ -6,7 +6,7 @@ This file serves as the persistent state memory for the automated loop. The agen
 
 ## 🔄 Current Loop Status
 - **Last Run**: 2026-06-26 (Completed Z-Axis Visual Scaling)
-- **Active Iteration**: None
+- **Active Iteration**: TASK-009
 - **System Health**: Green 🟢
 
 ---
@@ -24,6 +24,7 @@ These items are discovered by the automated triage schedule. They must be valida
 | `TASK-006` | Correct boost pad coordinates and remove duplicate layout | 2026-06-25 | High | `[x] Completed` | None |
 | `TASK-007` | Create script to run local server and open default browser | 2026-06-26 | Medium | `[x] Completed` | None |
 | `TASK-008` | Z-axis visual scaling for players and ball with static boundaries | 2026-06-26 | High | `[x] Completed` | None |
+| `TASK-009` | Correct average speed and boost statistics using active gameplay frames | 2026-06-26 | High | `[/] In-Progress` | `C:/Users/strmshdw/.gemini/antigravity-ide/scratch/worktrees/task-009` |
 
 *Status options: `[ ] Pending`, `[/] In-Progress`, `[x] Completed`, `[!] Failed`*
 
@@ -34,7 +35,7 @@ To prevent collisions, parallel work occurs in isolated git worktrees.
 
 | Worktree Path | Branch | Target Task | Created | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| - | - | - | - | - |
+| `C:/Users/strmshdw/.gemini/antigravity-ide/scratch/worktrees/task-009` | `feature/active-stats` | `TASK-009` | 2026-06-26 | `Active` |
 
 ---
 
@@ -51,6 +52,7 @@ No code is merged without passing the verification loop (maker/checker split).
 | `TASK-006` | System Verifier | Browser Subagent | `Passed (exact 34 boost pads parsed from res/boostpads.json match layout)` | `Verified` |
 | `TASK-007` | System Verifier | `powershell -File scripts/run-server.ps1` | `Passed (starts server and opens browser; clean exit)` | `Verified` |
 | `TASK-008` | User | Manual Verification | `Passed (manually verified by user)` | `Verified` |
+| `TASK-009` | System Verifier | Manual Verify | Pending | Pending |
 
 ---
 
