@@ -53,6 +53,17 @@ class ReplayParser {
                         if (frame.DeletedActorIds) {
                             frame.DeletedActorIds.forEach(id => {
                                 if (id === ballActorId) ballActorId = null;
+                                
+                                // Clean up player temporary state when their car is demolished
+                                const priId = carToPri[id];
+                                const name = priToName[priId];
+                                if (name) {
+                                    delete currentPositions[name];
+                                    delete currentBoost[name];
+                                    delete currentSpeed[name];
+                                    delete lastUpdatePos[name];
+                                }
+
                                 delete carToPri[id];
                                 delete boostToCar[id];
                             });
@@ -192,12 +203,24 @@ class ReplayParser {
                             state: currentGameState
                         };
 
+                        // Determine which players have active cars in this frame
+                        const activePlayerNames = new Set();
+                        Object.keys(carToPri).forEach(carId => {
+                            const priId = carToPri[carId];
+                            const name = priToName[priId];
+                            if (name) {
+                                activePlayerNames.add(name);
+                            }
+                        });
+
                         Object.keys(currentPositions).forEach(name => {
-                            frameSnapshot.players[name] = {
-                                ...currentPositions[name],
-                                boost: currentBoost[name] !== undefined ? currentBoost[name] : 33,
-                                speed: currentSpeed[name] !== undefined ? currentSpeed[name] : 0
-                            };
+                            if (activePlayerNames.has(name)) {
+                                frameSnapshot.players[name] = {
+                                    ...currentPositions[name],
+                                    boost: currentBoost[name] !== undefined ? currentBoost[name] : 33,
+                                    speed: currentSpeed[name] !== undefined ? currentSpeed[name] : 0
+                                };
+                            }
                         });
 
                         frames.push(frameSnapshot);
