@@ -301,6 +301,27 @@ class ReplayEngine {
         }
     }
 
+    getNextActiveTime(time) {
+        if (!this.replayData || !this.replayData.frames) return time;
+        const frames = this.replayData.frames;
+        
+        // Find index of the first frame at or after 'time'
+        let idx = 0;
+        while (idx < frames.length && frames[idx].time < time) {
+            idx++;
+        }
+        
+        // If current frame is not 'Active', skip forward to the next 'Active' frame
+        if (idx < frames.length && frames[idx].state !== 'Active') {
+            while (idx < frames.length && frames[idx].state !== 'Active') {
+                idx++;
+            }
+            // Return next active frame time, or the end of the replay if none remain
+            return idx < frames.length ? frames[idx].time : frames[frames.length - 1].time;
+        }
+        return time;
+    }
+
     animate() {
         if (!this.isPlaying) return;
         
@@ -310,6 +331,16 @@ class ReplayEngine {
         
         const totalDuration = this.replayData.frames[this.replayData.frames.length - 1].time;
         this.currentTime += dt * this.playbackSpeed;
+        
+        // Skip inactive plays
+        const nextActive = this.getNextActiveTime(this.currentTime);
+        if (nextActive !== this.currentTime) {
+            this.currentTime = nextActive;
+            // Clear history trails to avoid jump lines
+            Object.keys(this.playerPaths).forEach(name => {
+                this.playerPaths[name] = [];
+            });
+        }
         
         if (this.currentTime >= totalDuration) {
             this.currentTime = totalDuration;
@@ -323,7 +354,10 @@ class ReplayEngine {
     }
 
     seekTo(time) {
-        this.currentTime = time;
+        // Skip inactive plays
+        const nextActive = this.getNextActiveTime(time);
+        this.currentTime = nextActive;
+        
         // Clear history trails to avoid jump lines
         Object.keys(this.playerPaths).forEach(name => {
             this.playerPaths[name] = [];
