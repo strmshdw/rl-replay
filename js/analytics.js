@@ -156,7 +156,7 @@ class ReplayAnalytics {
                     <td>${p.Saves}</td>
                     <td>${p.Shots}</td>
                     <td>${avgSpeedKmh} km/h</td>
-                    <td>${avgBoost}%</td>
+                    <td>${avgBoost}</td>
                 </tr>
             `;
         });
@@ -185,7 +185,7 @@ class ReplayAnalytics {
             const val = i * 25;
             svgHtml += `
                 <line x1="${x}" y1="10" x2="${x}" y2="${height - 25}" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-                <text x="${x}" y="${height - 8}" fill="var(--text-muted)" font-size="10" font-family="Inter" text-anchor="middle">${val}%</text>
+                <text x="${x}" y="${height - 8}" fill="var(--text-muted)" font-size="10" font-family="Inter" text-anchor="middle">${val}</text>
             `;
         }
 
@@ -212,7 +212,7 @@ class ReplayAnalytics {
                 <rect x="${padding + 130}" y="${y}" width="${barWidth}" height="${barHeight}" rx="4" fill="${teamColor}" filter="drop-shadow(0 0 3px ${teamColorGlow})"/>
                 
                 <!-- Value tag -->
-                <text x="${padding + 130 + barWidth + 8}" y="${y + 12}" fill="${teamColor}" font-size="11" font-family="Inter" font-weight="700">${avgBoost}%</text>
+                <text x="${padding + 130 + barWidth + 8}" y="${y + 12}" fill="${teamColor}" font-size="11" font-family="Inter" font-weight="700">${avgBoost}</text>
             `;
         });
 
